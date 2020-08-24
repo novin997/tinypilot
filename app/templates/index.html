@@ -80,7 +80,7 @@
         </button>
       </div>
       <div id="remote-screen">
-        <img src="/stream?advance_headers=1" />
+        <img class="screen" src="/stream?advance_headers=1" />
       </div>
       <div id="keystroke-history" class="container">
         <div id="recent-keys"></div>
@@ -135,6 +135,10 @@
           </div>
         </div>
       </div>
+    </div>
+    <div class="mouse-controller">
+      <button id="left-click">Mouse Left-Click</button>
+      <button id="right-click">Mouse Right-Click</button>
     </div>
 
     <script src="/third-party/socket.io/2.3.0/socket.io.js"></script>

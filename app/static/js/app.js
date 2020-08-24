@@ -305,8 +305,113 @@ document.getElementById("cancel-shutdown").addEventListener("click", () => {
 for (const button of document.getElementsByClassName("manual-modifier-btn")) {
   button.addEventListener("click", onManualModifierButtonClicked);
 }
+
 keyboardSocket.on("connect", onKeyboardSocketConnect);
 keyboardSocket.on("disconnect", onKeyboardSocketDisconnect);
 keyboardSocket.on("keystroke-received", (data) => {
   updateKeyStatus(processingQueue.shift(), data.success);
+});
+
+// Novin's Extra Code
+const screen = document.querySelector(".screen")
+let mouseTimer;
+let currX,currY;
+let prevX,prevY;
+
+
+document.querySelector("#left-click").addEventListener("click", () => {
+  keyboardSocket.emit("mouse", { click: 1, moveX: 0, moveY:0 });
+  keyboardSocket.emit("mouseRelease");
+});
+
+document.querySelector("#right-click").addEventListener("click", () => {
+  keyboardSocket.emit("mouse", { click: 2, moveX: 0, moveY:0 });
+  keyboardSocket.emit("mouseRelease");
+});
+
+function updateMouse()
+{
+  let positionInfo = screen.getBoundingClientRect();
+  console.log(currX + " " + currY);
+  console.log(prevX + " " + prevY);
+  // if(currX == prevX && currY == prevY)
+  //   return
+  // else
+  {
+    //let offsetX = Math.round((currX - prevX)*(1920/positionInfo.width));
+    //let offsetY = Math.round((currY - prevY)*(1080/positionInfo.height));
+    let offsetX = -200;
+    let offsetY = 0;
+    while(!(offsetX == 0 && offsetY == 0))
+    {
+      console.log(offsetX + " " + offsetY);
+      let x=0;
+      //check for x-axis
+      if(offsetX > 0)
+      {
+        if(offsetX >= 127)
+        {
+          x = 127;
+          offsetX -= x;
+        }
+        else
+        {
+          x = offsetX;
+          offsetX = 0;
+        }
+      }
+      else if(offsetX < 0)
+      {
+        if(offsetX <= -128)
+        {
+          // This equals to -128 in 2's complement
+          x = 0x80;
+          offsetX += 128;
+        }
+        else
+        {
+          x = offsetX * -1;
+          console.log(~x);
+          x = (~x & 0xff) + 1;
+          offsetX = 0;
+        }
+      }
+      else
+      {
+        x = 0;
+      }
+      console.log(`x equals ${x}`);
+    }
+  }
+}
+
+screen.addEventListener("mouseup", (e) => {
+  if(e.button == 1)
+  {
+    console.log("middle button pressed");
+    
+    console.log(e.clientX + " " + e.clientY);
+    prevX = e.clientX;
+    prevY = e.clientY;
+    updateMouse();
+    // mouseTimer = setInterval(()=>
+    // { 
+    //   updateMouse(); 
+    // }, 5000);
+  }
+});
+
+screen.addEventListener("mousedown", (e) => {
+  if(e.button === 1)
+  {
+    e.preventDefault();
+    return false;
+  } 
+});
+
+screen.addEventListener('mousemove', (e)=>
+{
+  // console.log(e.clientX + " " + e.clientY);
+  currX = e.clientX;
+  currY = e.clientY;
 });

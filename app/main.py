@@ -28,6 +28,7 @@ debug = 'DEBUG' in os.environ
 use_reloader = os.environ.get('USE_RELOADER', '1') == '1'
 # Location of file path at which to write keyboard HID input.
 keyboard_path = os.environ.get('KEYBOARD_PATH', '/dev/hidg0')
+mouse_path = os.environ.get('MOUSE_PATH', '/dev/hidg1')
 
 app = flask.Flask(__name__, static_url_path='')
 # TODO(mtlynch): Ideally, we wouldn't accept requests from any origin, but the
@@ -50,6 +51,23 @@ def _parse_key_event(payload):
                                         ctrl_modifier=payload['ctrlKey'],
                                         key=payload['key'],
                                         key_code=payload['keyCode'])
+
+
+@socketio.on('mouse')
+def socket_mouseEvent(message):
+    try:
+        logger.info(message["click"])
+        hid.send_mouseCommand(mouse_path, message["moveX"], message["moveY"], message["click"])
+    except hid.WriteError as e:
+        logger.error("Send_mouseCommand Failed: %s", e)
+
+
+@socketio.on('mouseRelease')
+def socket_mouse_release():
+    try:
+        hid.release_mouse(mouse_path)
+    except hid.WriteError as e:
+        logger.error('Failed to release keys: %s', e)
 
 
 @socketio.on('keystroke')

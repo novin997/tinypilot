@@ -36,9 +36,21 @@ def _write_to_hid_interface_with_timeout(hid_path, buffer):
             'Failed to write to HID interface. Is USB cable connected?')
 
 
+def send_mouseCommand(mouse_path, x_axis, y_axis, click_type):
+    # Mouse HID Command is sent over 4 Bytes
+    buf = [0] * 4
+    buf[0] = click_type
+    buf[1] = x_axis
+    buf[2] = y_axis
+    _write_to_hid_interface_with_timeout(mouse_path, buf)
+
+
+def release_mouse(mouse_path):
+    _write_to_hid_interface_with_timeout(mouse_path, [0] * 4)
+
+
 def send_keystroke(keyboard_path, control_keys, hid_keycode):
-    # First 8 bytes are for the first keystroke. Second 8 bytes are
-    # all zeroes to indicate release of keys.
+    # First 8 bytes are for the first keystroke. Second 8 bytes are call zeroes to indicate release of keys.
     buf = [0] * 8
     buf[0] = control_keys
     buf[2] = hid_keycode

@@ -1,0 +1,22 @@
+# Move the Mouse right by .... pixels
+# 2nd Byte is x axis movement
+# 3rd Byte is y axis movement
+# 4th Byte is optional field
+
+#simulate clear command
+echo -ne "\x00\x00\x00\x00" | sudo tee /dev/hidg1
+
+# simulate move right
+echo -ne "\x00\x7F\x00\x00" | sudo tee /dev/hidg1
+
+#simulate left click
+echo -ne "\x01\x00\x00\x00" | sudo tee /dev/hidg1
+
+#simulate right click
+echo -ne "\x02\x00\x00\x00" | sudo tee /dev/hidg1
+
+#app command
+PORT=8000 ./app/main.py
+
+#ustreamer command
+./ustreamer --device=/dev/video0 --host=127.0.0.1 --port=8001 --resolution 1920x1080 --encoder hw --format jpeg --desired-fps 30
